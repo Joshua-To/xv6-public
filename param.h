@@ -12,3 +12,11 @@
 #define NBUF         (MAXOPBLOCKS*3)  // size of disk block cache
 #define FSSIZE       1000  // size of file system in blocks
 
+// Telemetry system parameters
+#define TELEMETRY_BUFFER_SIZE  8192   // Max telemetry samples in ring buffer
+#define TELEMETRY_SAMPLE_SIZE  64     // Bytes per sample (struct telemetry_sample)
+#define MAX_PROCESS_PROFILES   128    // Max tracked process profiles
+#define MAX_AI_PATCHES         16     // Max kernel patches that can be applied
+#define ANOMALY_BUFFER_SIZE    256    // Max anomaly reports
+#define TELEMETRY_FLUSH_TICKS  10     // Flush telemetry every N timer ticks
+

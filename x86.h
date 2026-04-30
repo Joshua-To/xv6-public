@@ -1,5 +1,14 @@
 // Routines to let C code use special x86 instructions.
 
+// High-resolution cycle counter for timing syscalls
+static inline uint64
+rdtsc(void)
+{
+  uint32 lo, hi;
+  asm volatile("rdtsc" : "=a" (lo), "=d" (hi));
+  return ((uint64)hi << 32) | lo;
+}
+
 static inline uchar
 inb(ushort port)
 {

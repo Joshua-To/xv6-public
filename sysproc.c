@@ -87,3 +87,42 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// TEST: Simple list search - generates telemetry
+int
+test_list_search(int target)
+{
+  int list[100];
+  int i, count = 0;
+  for(i = 0; i < 100; i++) {
+    list[i] = i * 7;
+  }
+  for(i = 0; i < 100; i++) {
+    if(list[i] == target) count++;
+  }
+  return count;
+}
+
+// Syscall wrappers for test functions
+int
+sys_test_list_search(void)
+{
+  int target;
+  if(argint(0, &target) < 0)
+    return -1;
+  return test_list_search(target);
+}
+
+int
+sys_test_process_scan(void)
+{
+  extern int test_process_list_scan(void);
+  return test_process_list_scan();
+}
+
+int
+sys_test_trap_scan(void)
+{
+  extern int test_trap_dispatch_scan(void);
+  return test_trap_dispatch_scan();
+}

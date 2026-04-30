@@ -18,6 +18,26 @@ int nextpid = 1;
 extern void forkret(void);
 extern void syscall_trapret(void);
 
+// TEST: Process list scan - generates telemetry
+int
+test_process_list_scan(void)
+{
+  struct proc *p;
+  int count = 0;
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    if(p->state != UNUSED) {
+      count++;
+      int i;
+      for(i = 0; i < 100; i++) {
+        count += (p->pid + i) % 7;
+      }
+    }
+  }
+  release(&ptable.lock);
+  return count;
+}
+
 static void wakeup1(void *chan);
 
 void

@@ -43,7 +43,9 @@ main(int argc, char *argv[])
     read(fd, data, sizeof(data));
   close(fd);
 
-  wait();
+  // Wait for all children (not just the first one)
+  while(wait() >= 0)
+    ;
 
   exit();
 }
