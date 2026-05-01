@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "x86.h"
 #include "syscall.h"
+#include "telemetry.h"
 
 // Fetch the int at addr from the current process.
 int
@@ -122,6 +123,14 @@ extern addr_t sys_unlink(void);
 extern addr_t sys_wait(void);
 extern addr_t sys_write(void);
 extern addr_t sys_uptime(void);
+extern addr_t sys_telemetry_read(void);
+extern addr_t sys_telemetry_subscribe(void);
+extern addr_t sys_patch_apply(void);
+extern addr_t sys_patch_rollback(void);
+extern addr_t sys_monitor_control(void);
+extern addr_t sys_test_list_search(void);
+extern addr_t sys_test_process_scan(void);
+extern addr_t sys_test_trap_scan(void);
 
 // PAGEBREAK!
 static addr_t (*syscalls[])(void) = {
@@ -146,11 +155,22 @@ static addr_t (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_telemetry_read]     sys_telemetry_read,
+[SYS_telemetry_subscribe] sys_telemetry_subscribe,
+[SYS_patch_apply]        sys_patch_apply,
+[SYS_patch_rollback]     sys_patch_rollback,
+[SYS_monitor_control]    sys_monitor_control,
+[SYS_test_list_search]   sys_test_list_search,
+[SYS_test_process_scan]  sys_test_process_scan,
+[SYS_test_trap_scan]     sys_test_trap_scan,
 };
 
 void
 syscall(struct trapframe *tf)
 {
+  uint64 start_time = rdtsc();
+  static int debug_count = 0;
+  
   proc->tf = tf;
   uint64 num = proc->tf->rax;
   if (num > 0 && num < NELEM(syscalls) && syscalls[num]) {
@@ -160,6 +180,21 @@ syscall(struct trapframe *tf)
             proc->pid, proc->name, num);
     tf->rax = -1;
   }
+  
+  // Record telemetry for this syscall
+  uint64 end_time = rdtsc();
+  uint64 cycle_delta = end_time - start_time;
+  
+  // Debug: show raw cycle counts for first few syscalls
+  if (debug_count++ < 20 && num == 4) {
+    cprintf("[SYSCALL_DEBUG] sys %d: cycles=%d start=%d end=%d\n", 
+           num, (uint)cycle_delta, (uint)(start_time & 0xFFFFFFFF), (uint)(end_time & 0xFFFFFFFF));
+  }
+  
+  // RDTSC on QEMU might run at different rate. Try 1000 cycles/µs (1GHz)
+  // or detect dynamically. For now use 1000.
+  uint duration_us = (uint)(cycle_delta / 1000);
+  telemetry_record_syscall((int)num, proc->pid, duration_us);
   if (proc->killed)
     exit();
 }

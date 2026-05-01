@@ -5,6 +5,8 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
+#include "telemetry.h"
+#include "patcher.h"
 
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
@@ -32,6 +34,8 @@ main(void)
   binit();         // buffer cache
   fileinit();      // file table
   ideinit();       // disk
+  telemetry_init(); // telemetry subsystem
+  patcher_init();   // patch subsystem
   startothers();   // start other processors
   kinit2();
   userinit();      // first user process

@@ -20,3 +20,16 @@
 #define SYS_link   19
 #define SYS_mkdir  20
 #define SYS_close  21
+
+// Telemetry syscalls
+#define SYS_telemetry_read   22
+#define SYS_telemetry_subscribe 23
+#define SYS_patch_apply      24
+#define SYS_patch_rollback   25
+#define SYS_monitor_control  26
+
+// Test/AI syscalls
+#define SYS_test_list_search 27
+#define SYS_test_process_scan 28
+#define SYS_test_trap_scan   29
+

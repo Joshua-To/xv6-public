@@ -14,6 +14,19 @@ extern addr_t vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
 
+// TEST: Trap dispatch scan - generates telemetry
+int
+test_trap_dispatch_scan(void)
+{
+  int i, result = 0;
+  for(i = 0; i < 256; i++) {
+    if(i % 16 == 0) {
+      result += i;
+    }
+  }
+  return result;
+}
+
 static void
 mkgate(uint *idt, uint n, addr_t kva, uint pl)
 {

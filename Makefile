@@ -1,7 +1,7 @@
 KERNOBJS = \
-	bio.o console.o exec.o file.o fs.o ide.o ioapic.o kalloc.o kbd.o lapic.o \
-  log.o main.o mp.o pipe.o proc.o sleeplock.o spinlock.o string.o swtch.o \
-  syscall.o sysfile.o sysproc.o trapasm.o trap.o uart.o vectors.o vm.o \
+	bio.o anomaly.o console.o exec.o file.o fs.o ide.o ioapic.o kalloc.o kbd.o lapic.o \
+  log.o main.o mp.o patcher.o pipe.o proc.o sleeplock.o spinlock.o string.o swtch.o \
+  syscall.o sysfile.o sysproc.o telemetry.o systelemetry.o trapasm.o trap.o uart.o vectors.o vm.o \
 #
 
 UNAME_S := $(shell uname -s)
@@ -41,6 +41,7 @@ xv6.img: bootblock kernel fs.img
 	dd if=/dev/zero of=xv6.img count=10000
 	dd if=bootblock of=xv6.img conv=notrunc
 	dd if=kernel of=xv6.img seek=1 conv=notrunc
+	dd if=fs.img of=xv6.img seek=1000 conv=notrunc
 
 xv6memfs.img: bootblock kernelmemfs
 	dd if=/dev/zero of=xv6memfs.img count=10000
@@ -94,7 +95,7 @@ kernelmemfs: $(MEMFSOBJS) entry.o entryother initcode kernel.ld fs.img
 vectors.S: vectors.pl
 	perl vectors.pl > vectors.S
 
-ULIB = ulib.o usys.o printf.o umalloc.o
+ULIB = ulib.o usys.o printf.o umalloc.o patch_persist.o
 
 _%: %.o $(ULIB) user.ld
 	$(LD) $(LDFLAGS) -n -N -T user.ld -e main -Ttext 0x1000 -o $@ $< $(ULIB)
@@ -117,8 +118,9 @@ mkfs: mkfs.c fs.h
 .PRECIOUS: %.o
 
 UPROGS= \
-	_cat _echo _forktest _grep _init _kill _ln _ls _mkdir \
-	_rm _sh _stressfs _usertests _wc _zombie \
+	_ai_daemon _ai_test _cat _echo _forktest _grep _init _kill _ln _ls _mkdir \
+	_monitor _rm _sh _stressfs _test_excessive_syscalls _test_memory_spike _test_slow_syscalls \
+	_wc _zombie \
 #
 
 fs.img: mkfs README $(UPROGS)

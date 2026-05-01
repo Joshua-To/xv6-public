@@ -2,6 +2,7 @@
 #include "types.h"
 struct stat;
 struct rtcdate;
+struct monitor_control;
 
 // system calls
 int fork(void);
@@ -25,6 +26,14 @@ int getpid(void);
 char* sbrk(uint64);
 int sleep(int);
 int uptime(void);
+int telemetry_read(struct telemetry_sample*, int);
+int telemetry_subscribe(void);
+int patch_apply(struct kpatch*, int);
+int patch_rollback(uint);
+int monitor_control(struct monitor_control*);
+int test_list_search(int);
+int test_process_scan(void);
+int test_trap_scan(void);
 
 // ulib.c
 int stat(char*, struct stat*);

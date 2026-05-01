@@ -2,6 +2,8 @@ struct buf;
 struct context;
 struct file;
 struct inode;
+struct kpatch;
+struct patch_history;
 struct pipe;
 struct proc;
 struct rtcdate;
@@ -163,6 +165,41 @@ void            idtinit(void);
 extern uint     ticks;
 void            tvinit(void);
 extern struct spinlock tickslock;
+
+// telemetry.c
+void            telemetry_init(void);
+void            telemetry_record_syscall(int, int, uint);
+void            telemetry_record_process_state(int, uchar);
+void            telemetry_record_memory_event(int, uint64, uchar);
+void            telemetry_record_io_event(int, uint, uint);
+void            telemetry_record_anomaly(int, uchar, uint);
+uint            telemetry_get_sample_count(void);
+int             telemetry_read_samples(struct telemetry_sample*, uint);
+struct system_state telemetry_get_system_state(void);
+timestamp_t     telemetry_now(void);
+
+// patcher.c
+void            patcher_init(void);
+int             patch_validate_checksum(struct kpatch*);
+int             patch_validate_bounds(struct kpatch*);
+int             patch_validate_format(struct kpatch*);
+int             patch_apply(struct kpatch*, int);
+int             patch_rollback(uint);
+int             patch_verify_applied(uint);
+struct kpatch*  patch_get(uint);
+int             patch_get_status(uint);
+int             patch_get_active_count(void);
+uint32          crc32(uchar*, uint);
+void            dump_patch_history(void);
+
+// anomaly.c
+int             detect_slow_syscall(struct telemetry_sample*);
+int             detect_excessive_syscalls(int, uint32);
+int             detect_memory_spike(struct telemetry_sample*);
+int             detect_io_stall(struct telemetry_sample*);
+void            analyze_telemetry_sample(struct telemetry_sample*);
+void            analyze_telemetry_batch(struct telemetry_sample*, uint);
+int             should_optimize_syscall(int, uint32, uint32);
 
 // uart.c
 void            uartearlyinit(void);
